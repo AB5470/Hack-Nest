@@ -82,4 +82,4 @@ const StudentIDCard = ({ data, title = "Student Master ID" }) => {
   );
 };
 
-export default StudentIDCard;
+export default StudentIDCard; 
