@@ -4,10 +4,11 @@ import { auth, db } from '../../firebase';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
-const [isFacePresent, setIsFacePresent] = useState(true);
+
 
 const ProctoredQuiz = () => {
   const videoRef = useRef(null);
+  const [isFacePresent, setIsFacePresent] = useState(true);
   
   // --- States ---
   const [currentQuestion, setCurrentQuestion] = useState(0);
