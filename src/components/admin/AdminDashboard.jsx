@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db } from '../../firebase';
 import { collection, onSnapshot, query, orderBy, doc, where, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 
 const AdminDashboard = () => {
+  // Demo Mode User Check
+  const user = JSON.parse(localStorage.getItem('user'));
+
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEvent, setFilterEvent] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  // --- ⚙️ NEW: GATEKEEPER STATES (Quiz Settings) ---
+  // --- ⚙️ GATEKEEPER STATES (Quiz Settings) ---
   const [minMarks, setMinMarks] = useState(60);
   const [updatingSettings, setUpdatingSettings] = useState(false);
 
@@ -143,7 +146,6 @@ const AdminDashboard = () => {
     const idMatch = reg.studentUniqueId?.toLowerCase().includes(searchLower);
     const matchesSearch = nameMatch || idMatch;
     
-    // Support filtering by Event Type or Quick Filters (Qualified/All)
     if (filterEvent === 'All') return matchesSearch;
     if (filterEvent === 'Shortlisted (Qualified)') {
       const score = Number(reg.quizScore || 0);
@@ -153,13 +155,19 @@ const AdminDashboard = () => {
     return matchesSearch && matchesEvent;
   });
 
-  // Base categories dropdown structure
   const eventTypes = ['All', 'Shortlisted (Qualified)', ...new Set(registrations.map(reg => reg.eventTitle))];
 
   return (
     <div className="flex flex-col gap-6 w-full">
       
-      {/* ─── NEW STEP: GATEKEEPER CRITERIA PANEL ─── */}
+      {/* Demo Mode Banner */}
+      {user?.isGuest && (
+        <div className="w-full bg-purple-500/15 border-b border-purple-400 color-[#a78bfa] py-2.5 px-4 text-center font-mono text-xs tracking-wider sticky top-0 z-50">
+          ⚡ DEMO ADMIN ACTIVE — Full Read-Only Access to Proctoring Logs, Dynamic Leaderboards & Analytics.
+        </div>
+      )}
+
+      {/* --- GATEKEEPER CRITERIA PANEL --- */}
       <div className="animate-slide-in-top p-6 bg-gradient-to-r from-slate-900 via-[#0d1527] to-slate-900 rounded-2xl border border-blue-500/20 shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -192,7 +200,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ─── LIVE DATA ENGINE TABLE ─── */}
+      {/* --- LIVE DATA ENGINE TABLE --- */}
       <div className="animate-slide-in-top p-6 md:p-8 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
@@ -242,8 +250,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredData.map((reg, index) => {
-                  // Core score parsing evaluation logic 
+                {filteredData.map((reg) => {
                   const currentScore = Number(reg.quizScore || 0);
                   const isQualified = currentScore >= Number(minMarks);
 

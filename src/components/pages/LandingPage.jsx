@@ -10,11 +10,23 @@ const CODE_SNIPPETS = [
   `@app.route('/submit')\ndef submit():\n  token = verify_jwt(\n    request.headers)\n  return grade(token)`,
 ];
 
-const FLOATING_LETTERS = ['A', 'B', 'Σ', 'λ', 'Ω', '∇'];
-
 export default function LandingPage({ onSignInClick }) {
   const canvasRef = useRef(null);
   const [glitch, setGlitch] = useState(false);
+
+  // Guest Admin Handler
+  const handleGuestAdminLogin = () => {
+    const guestUser = {
+      uid: 'demo-admin-guest',
+      email: 'guest.admin@hacknest.com',
+      role: 'admin',
+      isGuest: true,
+    };
+    localStorage.setItem('user', JSON.stringify(guestUser));
+    
+    // Yahan apna actual Admin Dashboard route daalein (e.g., /admin/dashboard ya /admin)
+    window.location.href = '/admin/dashboard';
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -83,9 +95,10 @@ export default function LandingPage({ onSignInClick }) {
       borderBottom: '1px solid rgba(0,220,240,0.14)',
     },
     navLogo: { fontFamily: "'Orbitron',monospace", fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.14em', color: '#e0f7ff', textShadow: '0 0 18px rgba(0,240,255,0.5)' },
-    navLinks: { display: 'flex', alignItems: 'center', gap: 'clamp(1rem,2.5vw,3rem)', listStyle: 'none' },
+    navLinks: { display: 'flex', alignItems: 'center', gap: 'clamp(0.8rem,1.8vw,2.2rem)', listStyle: 'none' },
     navLink: { fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.18em', color: 'rgba(180,230,245,0.65)', textDecoration: 'none', textTransform: 'uppercase', cursor: 'pointer', transition: 'color .2s' },
     joinBtn: { fontFamily: "'Orbitron',monospace", fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#00e8ff', background: 'transparent', border: '1px solid rgba(0,232,255,0.55)', padding: '0.5rem 1.4rem', cursor: 'pointer', clipPath: 'polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)', transition: 'background .25s,box-shadow .25s' },
+    demoBtn: { fontFamily: "'Orbitron',monospace", fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#a78bfa', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.6)', padding: '0.5rem 1.2rem', cursor: 'pointer', clipPath: 'polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)', boxShadow: '0 0 12px rgba(167,139,250,0.2)', transition: 'all .25s ease' },
     avatar: { width: 36, height: 36, borderRadius: '50%', border: '2px solid rgba(0,220,240,0.5)', background: 'rgba(0,220,240,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Orbitron',monospace", fontWeight: 700, fontSize: '0.9rem', color: '#00e8ff' },
     hero: {
       position: 'relative', zIndex: 5, width: '100%', maxWidth: '1200px',
@@ -121,7 +134,6 @@ export default function LandingPage({ onSignInClick }) {
     e.currentTarget.style.transform = on ? 'translateY(-4px)' : 'translateY(0)';
   };
 
-  /* ── Floating holographic panel base style ── */
   const panelBase = {
     position: 'fixed', zIndex: 2, pointerEvents: 'none',
     background: 'rgba(4,18,36,0.55)',
@@ -130,7 +142,6 @@ export default function LandingPage({ onSignInClick }) {
     borderRadius: 8,
   };
 
-  /* ── Bar chart data ── */
   const bars = [55, 80, 45, 92, 68, 75, 38, 88];
   const barColors = ['#00e8ff', '#60a5fa', '#00e8ff', '#a78bfa', '#60a5fa', '#00e8ff', '#a78bfa', '#00e8ff'];
 
@@ -159,11 +170,7 @@ export default function LandingPage({ onSignInClick }) {
       <div style={S.glowL} />
       <div style={S.glowR} />
 
-      {/* ═══════════════════════════════════════
-          FLOATING AESTHETIC ELEMENTS
-      ═══════════════════════════════════════ */}
-
-      {/* 1. Big glowing "A" — top right, like reference image */}
+      {/* FLOATING ELEMENTS */}
       <div style={{ position: 'fixed', top: '8%', right: '4%', zIndex: 2, pointerEvents: 'none',
         fontFamily: "'Orbitron',monospace", fontWeight: 900,
         fontSize: 'clamp(80px,10vw,140px)', color: 'transparent',
@@ -172,7 +179,6 @@ export default function LandingPage({ onSignInClick }) {
         opacity: 0.75, letterSpacing: '-0.05em', userSelect: 'none',
       }}>A</div>
 
-      {/* 2. Second glowing "A" smaller — left side mid */}
       <div style={{ position: 'fixed', top: '42%', left: '2.5%', zIndex: 2, pointerEvents: 'none',
         fontFamily: "'Orbitron',monospace", fontWeight: 900,
         fontSize: 'clamp(50px,6vw,90px)', color: 'transparent',
@@ -181,7 +187,6 @@ export default function LandingPage({ onSignInClick }) {
         opacity: 0.6, userSelect: 'none',
       }}>A</div>
 
-      {/* 3. Lambda / Sigma floating letters — scattered */}
       {[
         { ch: 'λ', top: '14%', left: '6%', sz: 38, color: 'rgba(0,232,255,0.35)', anim: 'floatC 6s ease-in-out infinite' },
         { ch: 'Σ', top: '70%', right: '6%', sz: 42, color: 'rgba(96,165,250,0.35)', anim: 'floatD 8s ease-in-out infinite' },
@@ -196,29 +201,25 @@ export default function LandingPage({ onSignInClick }) {
         }}>{ch}</div>
       ))}
 
-      {/* 4. Code snippet panel — LEFT side */}
+      {/* Code Snippets & Visual Panels */}
       <div style={{ ...panelBase, top: '18%', left: '1.5%', width: 220, padding: '14px 16px', animation: 'floatC 7s ease-in-out infinite' }}>
         <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.6rem', color: 'rgba(0,220,240,0.4)', letterSpacing: '0.15em', marginBottom: 8 }}>// ALGO_ENGINE</div>
         <pre style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.6rem', color: 'rgba(0,220,240,0.75)', lineHeight: 1.7, whiteSpace: 'pre', margin: 0, overflow: 'hidden' }}>{CODE_SNIPPETS[0]}</pre>
         <div style={{ marginTop: 10, height: 1, background: 'linear-gradient(90deg,transparent,rgba(0,220,240,0.3),transparent)' }} />
       </div>
 
-      {/* 5. Code snippet panel — RIGHT side */}
       <div style={{ ...panelBase, top: '28%', right: '1.5%', width: 215, padding: '14px 16px', animation: 'floatB 8s ease-in-out infinite' }}>
         <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.6rem', color: 'rgba(96,165,250,0.5)', letterSpacing: '0.15em', marginBottom: 8 }}>// GRAPH_BFS</div>
         <pre style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.6rem', color: 'rgba(96,165,250,0.75)', lineHeight: 1.7, whiteSpace: 'pre', margin: 0 }}>{CODE_SNIPPETS[2]}</pre>
       </div>
 
-      {/* 6. SQL snippet panel — bottom left */}
       <div style={{ ...panelBase, bottom: '14%', left: '1.5%', width: 200, padding: '12px 14px', animation: 'floatE 9s ease-in-out infinite' }}>
         <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.58rem', color: 'rgba(167,139,250,0.45)', letterSpacing: '0.12em', marginBottom: 6 }}>// DB_QUERY</div>
         <pre style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.58rem', color: 'rgba(167,139,250,0.7)', lineHeight: 1.65, whiteSpace: 'pre', margin: 0 }}>{CODE_SNIPPETS[3]}</pre>
       </div>
 
-      {/* 7. Bar chart panel — bottom right (like the reference image) */}
       <div style={{ ...panelBase, bottom: '10%', right: '1.5%', width: 210, padding: '16px 18px', animation: 'floatD 6.5s ease-in-out infinite' }}>
         <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.58rem', color: 'rgba(0,220,240,0.45)', letterSpacing: '0.15em', marginBottom: 12 }}>// SCORE_TELEMETRY</div>
-        {/* Bar chart */}
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 60 }}>
           {bars.map((h, i) => (
             <div key={i} style={{
@@ -236,62 +237,6 @@ export default function LandingPage({ onSignInClick }) {
           ))}
         </div>
       </div>
-
-      {/* 8. Team formation panel — mid right (like reference image) */}
-      <div style={{ ...panelBase, top: '60%', right: '2%', padding: '16px 20px', animation: 'floatA 7s ease-in-out infinite, teamPulse 3s ease-in-out infinite' }}>
-        <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.58rem', color: 'rgba(167,139,250,0.5)', letterSpacing: '0.14em', marginBottom: 10 }}>// TEAM_NODES</div>
-        {/* Node graph — 3 circles connected */}
-        <svg width="100" height="70" viewBox="0 0 100 70" style={{ overflow: 'visible' }}>
-          <line x1="20" y1="20" x2="80" y2="20" stroke="rgba(167,139,250,0.3)" strokeWidth="1" strokeDasharray="3,2" />
-          <line x1="50" y1="20" x2="50" y2="55" stroke="rgba(167,139,250,0.3)" strokeWidth="1" strokeDasharray="3,2" />
-          <line x1="20" y1="20" x2="50" y2="55" stroke="rgba(96,165,250,0.25)" strokeWidth="1" strokeDasharray="3,2" />
-          <line x1="80" y1="20" x2="50" y2="55" stroke="rgba(96,165,250,0.25)" strokeWidth="1" strokeDasharray="3,2" />
-          {[{cx:20,cy:20,c:'#a78bfa'},{cx:80,cy:20,c:'#60a5fa'},{cx:50,cy:55,c:'#00e8ff'}].map(({cx,cy,c},i) => (
-            <g key={i}>
-              <circle cx={cx} cy={cy} r="10" fill={`${c}18`} stroke={c} strokeWidth="1.2" />
-              <text x={cx} y={cy+4} textAnchor="middle" fontSize="9" fill={c} fontFamily="Orbitron,monospace" fontWeight="700">A</text>
-            </g>
-          ))}
-        </svg>
-      </div>
-
-      {/* 9. Scrolling matrix code strip — far left edge */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: 28, height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'hidden', opacity: 0.18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, animation: 'codeScroll 12s linear infinite', fontFamily: "'Share Tech Mono',monospace", fontSize: '0.55rem', color: '#00e8ff', lineHeight: 1.4, padding: '4px 2px' }}>
-          {Array.from({ length: 60 }, (_, i) => (
-            <span key={i}>{Math.random().toString(2).slice(2, 6)}</span>
-          ))}
-          {Array.from({ length: 60 }, (_, i) => (
-            <span key={`b${i}`}>{Math.random().toString(2).slice(2, 6)}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* 10. Scrolling matrix code strip — far right edge */}
-      <div style={{ position: 'fixed', top: 0, right: 0, width: 28, height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'hidden', opacity: 0.15 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, animation: 'codeScroll 16s linear infinite reverse', fontFamily: "'Share Tech Mono',monospace", fontSize: '0.55rem', color: '#a78bfa', lineHeight: 1.4, padding: '4px 2px' }}>
-          {Array.from({ length: 60 }, (_, i) => (
-            <span key={i}>{(i * 37 % 255).toString(16).padStart(2,'0')}</span>
-          ))}
-          {Array.from({ length: 60 }, (_, i) => (
-            <span key={`b${i}`}>{(i * 53 % 255).toString(16).padStart(2,'0')}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* 11. Complexity tag — top left floating */}
-      <div style={{ position: 'fixed', top: '10%', left: '5%', zIndex: 2, pointerEvents: 'none', animation: 'floatD 7s ease-in-out infinite' }}>
-        <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.65rem', color: 'rgba(0,232,255,0.5)', border: '1px solid rgba(0,232,255,0.2)', borderRadius: 3, padding: '3px 10px', background: 'rgba(0,232,255,0.04)', letterSpacing: '0.08em' }}>O(n log n)</div>
-      </div>
-
-      {/* 12. Hash tag — bottom mid floating */}
-      <div style={{ position: 'fixed', bottom: '20%', left: '50%', transform: 'translateX(-50%)', zIndex: 2, pointerEvents: 'none', animation: 'floatB 11s ease-in-out infinite' }}>
-        <div style={{ fontFamily: "'Share Tech Mono',monospace", fontSize: '0.58rem', color: 'rgba(167,139,250,0.35)', letterSpacing: '0.14em' }}>0x4HACK_N3ST_2025</div>
-      </div>
-
-      {/* ═══════════════════════════════════════
-          MAIN UI
-      ═══════════════════════════════════════ */}
 
       {/* NAV */}
       <nav style={S.nav}>
@@ -311,6 +256,25 @@ export default function LandingPage({ onSignInClick }) {
               onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = 'none'; }}
             >JOIN A TEAM</button>
           </li>
+          
+          {/* NEW: Demo Admin Button */}
+          <li>
+            <button 
+              onClick={handleGuestAdminLogin}
+              style={S.demoBtn}
+              onMouseOver={e => {
+                e.currentTarget.style.background = 'rgba(167, 139, 250, 0.22)';
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(167, 139, 250, 0.5)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'rgba(167, 139, 250, 0.08)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(167, 139, 250, 0.2)';
+              }}
+            >
+              👁️ DEMO ADMIN
+            </button>
+          </li>
+
           <li><div style={S.avatar}>A</div></li>
         </ul>
       </nav>
@@ -347,7 +311,7 @@ export default function LandingPage({ onSignInClick }) {
           onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,232,255,0.09)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(0,220,240,0.5),inset 0 0 18px rgba(0,220,240,0.18)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
           onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = '0 0 22px rgba(0,220,240,0.22),inset 0 0 12px rgba(0,220,240,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          EXECUTE ACCESS_NODE ⚡
+          ENTER HACK-NEST ⚡
         </button>
 
         <div style={S.featureGrid}>

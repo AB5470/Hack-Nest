@@ -73,9 +73,9 @@ const CreateHackathon = () => {
 
         <div className="text-center mb-10 w-full relative z-10">
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-3 drop-shadow-lg">
-            Host a New <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">Mission</span>
+             <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]"> Host a New Mission</span>
           </h2>
-          <p className="text-slate-400 text-sm md:text-base font-medium">Broadcast your opportunity to the cyberpunk network.</p>
+          <p className="text-slate-400 text-sm md:text-base font-medium">Broadcast your opportunity to the Hack-Nest network.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full relative z-10">
