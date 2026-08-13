@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const NAV_LINKS = ['HOME', 'QUIZ', 'CONTACT'];
 
@@ -329,10 +330,21 @@ export default function LandingPage({ onSignInClick }) {
       </main>
 
       <footer style={S.footer}>
-        <span>ABOUT US</span>
-        <span style={{ color: 'rgba(0,220,240,0.2)' }}>|</span>
-        <span>FOOTER</span>
-      </footer>
+  <Link 
+    to="/about" 
+    style={{
+      color: '#00e8ff',
+      textDecoration: 'none',
+      cursor: 'pointer',
+      transition: 'color 0.2s ease, text-shadow 0.2s ease',
+    }}
+    className="hover:text-cyan-300 hover:drop-shadow-[0_0_8px_rgba(0,232,255,0.8)]"
+  >
+    ABOUT US
+  </Link>
+  <span style={{ color: 'rgba(0,220,240,0.2)' }}>|</span>
+  <span>FOOTER</span>
+</footer>
     </div>
   );
 }

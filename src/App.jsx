@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, provider, db } from './firebase'; 
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore'; 
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 import CreateHackathon from './components/admin/CreateHackathon';
 import HackathonList from './components/admin/HackathonList';
@@ -16,6 +16,7 @@ import GenericButton from './components/UI/GenericButton';
 import ProctoredQuiz from './components/quiz/ProctoredQuiz';
 import AddQuestion from './components/admin/AddQuestion';
 import LandingPage from './components/pages/LandingPage';
+import AboutUs from './components/pages/AboutUs';
 
 emailjs.init("lDxiig5Y5ZDnunyBx"); 
 
@@ -23,7 +24,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState('student'); 
   const [isSystemAdmin, setIsSystemAdmin] = useState(false); 
-  const [isDemoAdmin, setIsDemoAdmin] = useState(false); // Guest Admin Mode
   const [isRegistered, setIsRegistered] = useState(false); 
   const [studentData, setStudentData] = useState(null); 
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,6 @@ function App() {
       if (currentUser) {
         setUser(currentUser);
         try {
-          // Check if logged-in user is a real Firebase System Admin
           const adminDoc = await getDoc(doc(db, "admins", currentUser.email));
           if (adminDoc.exists() && adminDoc.data().isAdmin === true) {
             setIsSystemAdmin(true);
@@ -58,7 +57,6 @@ function App() {
       } else {
         setUser(null);
         setIsSystemAdmin(false);
-        setIsDemoAdmin(false);
         setRole('student');
         setIsRegistered(false);
         setStudentData(null);
@@ -69,31 +67,12 @@ function App() {
   }, []);
 
   const handleLogin = async () => {
-    try { 
-      await signInWithPopup(auth, provider); 
-    } catch (error) { 
-      console.error("Login failed:", error.message); 
-    }
-  };
-
-  // ⚡ Enable Demo Admin Mode for logged-in non-admin user
-  const handleEnableDemoAdmin = () => {
-    setIsDemoAdmin(true);
-    setRole('admin');
-  };
-
-  // Switch back to normal student view
-  const handleDisableDemoAdmin = () => {
-    setIsDemoAdmin(false);
-    setRole('student');
+    try { await signInWithPopup(auth, provider); } 
+    catch (error) { console.error("Login failed:", error.message); }
   };
 
   const handleLogout = () => { 
     signOut(auth); 
-    setUser(null);
-    setIsSystemAdmin(false);
-    setIsDemoAdmin(false);
-    setRole('student');
     setShowLoginCard(false); 
   };
 
@@ -102,17 +81,12 @@ function App() {
     setIsRegistered(true);
   };
 
+  /* Cyberpunk Loading Screen */
   if (loading) {
     return (
-      <div style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        minHeight: '100vh', backgroundColor: '#020c1b', fontFamily: "'Share Tech Mono', monospace"
-      }}>
-        <div style={{
-          width: '50px', height: '50px', border: '4px solid rgba(0,220,240,0.15)',
-          borderTop: '4px solid #00e8ff', borderRadius: '50%', animation: 'spin 1s linear infinite'
-        }}></div>
-        <p style={{ color: '#00e8ff', fontSize: '0.85rem', letterSpacing: '0.25em', marginTop: '20px', textTransform: 'uppercase' }}>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#020c1b] font-mono">
+        <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
+        <p className="text-cyan-400 text-xs tracking-widest mt-5 uppercase">
           INITIALIZING SECURE_CORE...
         </p>
       </div>
@@ -121,208 +95,128 @@ function App() {
 
   return (
     <Router>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .app-root-wrapper { min-height: 100vh; width: 100%; background: linear-gradient(160deg, #020c1b 0%, #030f1e 55%, #050a14 100%); position: relative; overflow-x: hidden; }
-        .cyber-grid-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; background-image: linear-gradient(rgba(0,220,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,220,240,0.03) 1px, transparent 1px); background-size: 45px 45px; }
-        .neon-radial-glow { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%); filter: blur(60px); pointer-events: none; z-index: 1; }
-      `}</style>
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#020c1b] via-[#030f1e] to-[#050a14] relative overflow-x-hidden text-slate-100 font-sans">
+        {/* Core Matrix Background Effects */}
+        <div className="fixed inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#00dcf008_1px,transparent_1px),linear-gradient(to_bottom,#00dcf008_1px,transparent_1px)] bg-[size:45px_45px]"></div>
+        <div className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-cyan-500/5 blur-[60px] pointer-events-none z-0"></div>
 
-      <div className="app-root-wrapper app-container">
-        <div className="cyber-grid-overlay" />
-        <div className="neon-radial-glow" />
-
-        {/* ── NAVBAR ── */}
-        <nav className="navbar-custom" style={{ 
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-          padding: '0 4vw', minHeight: '65px', background: 'rgba(2, 12, 27, 0.85)', 
-          backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0, 220, 240, 0.15)',
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, flexWrap: 'wrap'
-        }}>
-          <Link to="/" style={{ textDecoration: 'none' }} onClick={() => setShowLoginCard(false)}>
-            <h2 style={{ margin: 0, fontWeight: '900', fontFamily: "'Orbitron', sans-serif", color: '#e0f7ff', fontSize: '1.1rem', letterSpacing: '0.15em', textShadow: '0 0 15px rgba(0,240,255,0.4)' }}>
+        {/* NAVBAR */}
+        <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-[#020c1b]/85 backdrop-blur-xl border-b border-cyan-500/15">
+          <Link to="/" onClick={() => setShowLoginCard(false)}>
+            <h2 className="m-0 font-black font-mono text-cyan-200/50 text-lg tracking-widest drop-shadow-[0_0_15px_rgba(0,240,255,0.4)]">
               HACK_NEST
             </h2>
           </Link>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div className="flex items-center gap-4">
             {user && (
-              <Link to="/quiz" style={{ textDecoration: 'none' }}>
+              <Link to="/quiz">
                 <GenericButton label="Quiz Tracker" color="#00e8ff" className="px-3 py-1" />
               </Link>
             )}
-
-            {/* Toggle Switch visible if actual System Admin */}
             {user && isSystemAdmin && (
-              <div style={{ transform: 'scale(0.9)', transformOrigin: 'right center' }}>
+              <div className="scale-90 origin-right">
                 <LiquidToggle currentRole={role} setRole={setRole} />
               </div>
             )}
           </div>
         </nav>
 
-        {/* ── MAIN CONTAINER ── */}
-        <main style={{ paddingTop: '110px', paddingBottom: '60px', width: '100%', maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 5, boxSizing: 'border-box' }}>
+        {/* MAIN CONTAINER */}
+        <main className="pt-28 pb-16 w-full max-w-7xl mx-auto relative z-10 px-4 box-border">
           <Routes>
             <Route path="/" element={
               user ? (
                 /* AUTHENTICATED WORKSPACE */
-                <div style={{ width: '100%', padding: '0 20px' }}>
-                  
-                  {/* USER STATUS BAR */}
-                  <div style={{ 
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                    background: 'rgba(8, 20, 38, 0.65)', backdropFilter: 'blur(16px)',
-                    padding: '20px 30px', borderRadius: '16px', border: '1px solid rgba(0, 220, 240, 0.15)', 
-                    marginBottom: '30px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', flexWrap: 'wrap', gap: '15px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <img src={user.photoURL || "https://api.dicebear.com/7.x/bottts/svg?seed=User"} alt="profile" style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid #00e8ff', boxShadow: '0 0 10px rgba(0,232,255,0.3)' }} />
+                <div className="w-full">
+                  <div className="flex flex-col md:flex-row justify-between items-center bg-slate-900/65 backdrop-blur-md p-5 rounded-2xl border border-cyan-500/15 mb-10 shadow-2xl gap-4">
+                    <div className="flex items-center gap-5">
+                      <img 
+                        src={user.photoURL} 
+                        alt="profile" 
+                        className="w-12 h-12 rounded-full border-2 border-cyan-400 shadow-[0_0_10px_rgba(0,232,255,0.3)]" 
+                      />
                       <div>
-                        <h3 style={{ margin: 0, color: '#e8f8ff', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '1.2rem' }}>
-                          USER: {user?.displayName}
+                        <h3 className="m-0 text-slate-100 font-bold text-lg font-sans">
+                          COMMANDER: {isRegistered ? studentData?.fullName : user.displayName?.split(' ')[0]}
                         </h3>
-                        <p style={{ margin: 0, fontSize: '0.75rem', fontFamily: "'Share Tech Mono', monospace", color: 'rgba(140,200,220,0.8)', letterSpacing: '0.05em' }}>
-                          MODE: <span style={{ color: role === 'admin' ? '#8b5cf6' : '#00e8ff', fontWeight: 'bold' }}>{role.toUpperCase()}_ACCESS {isDemoAdmin && '(DEMO EVALUATION)'}</span>
+                        <p className="m-0 text-xs font-mono text-cyan-200/60 tracking-wider flex items-center gap-2">
+                          STATUS: <span className={`font-semibold ${role === 'admin' ? 'text-purple-400' : 'text-cyan-400'} drop-shadow-[0_0_8px_currentColor]`}>
+                            {role.toUpperCase()}_ACCESS
+                          </span>
+                          {!isSystemAdmin && role === 'admin' && (
+                            <span className="text-[10px] bg-purple-950/80 text-purple-300 px-2 py-0.5 rounded border border-purple-500/40 font-mono">
+                              (READ-ONLY DEMO)
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {/* DEMO ADMIN TOGGLE FOR NON-ADMIN LOGGED IN USERS */}
+                    {/* LOGOUT BUTTON AND GUEST ADMIN BUTTON GROUP */}
+                    <div className="flex items-center gap-3">
                       {!isSystemAdmin && (
-                        !isDemoAdmin ? (
-                          <button 
-                            onClick={handleEnableDemoAdmin}
-                            style={{
-                              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(6, 182, 212, 0.25))',
-                              border: '1px solid #8b5cf6',
-                              color: '#c084fc',
-                              padding: '8px 16px',
-                              borderRadius: '8px',
-                              fontFamily: "'Share Tech Mono', monospace",
-                              fontSize: '0.8rem',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              boxShadow: '0 0 12px rgba(139, 92, 246, 0.3)'
-                            }}
-                          >
-                            ⚡ TRY DEMO ADMIN VIEW
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={handleDisableDemoAdmin}
-                            style={{
-                              background: 'rgba(239, 68, 68, 0.15)',
-                              border: '1px solid #ef4444',
-                              color: '#fca5a5',
-                              padding: '8px 16px',
-                              borderRadius: '8px',
-                              fontFamily: "'Share Tech Mono', monospace",
-                              fontSize: '0.8rem',
-                              fontWeight: 'bold',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            ↩ EXIT DEMO ADMIN
-                          </button>
-                        )
+                        <button
+                          onClick={() => setRole(role === 'admin' ? 'student' : 'admin')}
+                          className={`px-3 py-2 text-xs font-mono font-semibold rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                            role === 'admin'
+                              ? 'bg-purple-950/70 border-purple-500/50 text-purple-300 hover:bg-purple-900 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                              : 'bg-slate-800/80 border-purple-500/30 text-purple-400 hover:bg-purple-950/50 hover:border-purple-400'
+                          }`}
+                          title="Toggle Demo Admin Mode"
+                        >
+                          <span className={`w-2 h-2 rounded-full ${role === 'admin' ? 'bg-purple-400 animate-pulse' : 'bg-cyan-400'}`}></span>
+                          {role === 'admin' ? 'Exit Demo Admin' : 'Demo Admin Mode'}
+                        </button>
                       )}
-
                       <GenericButton label="Logout" onClick={handleLogout} color="#ef4444" />
                     </div>
                   </div>
 
-                  {/* CONTENT VIEW BASED ON CURRENT ROLE */}
                   {role === 'admin' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Link to="/add-questions" style={{ textDecoration: 'none' }}>
-                          <GenericButton label="Set Quiz Questions 📝" color="#8b5cf6" />
-                        </Link>
-                        {isDemoAdmin && (
-                          <span style={{ color: '#a855f7', fontFamily: "'Share Tech Mono', monospace", fontSize: '0.85rem' }}>
-                            [ Demo Admin Active: You can test adding hackathons and questions ]
-                          </span>
-                        )}
-                      </div>
-                      <CreateHackathon />
-                      <AdminDashboard />    
-                      <HackathonList role="admin" />
+                    <div className="flex flex-col gap-10">
+                      <Link to="/add-questions" className="w-max">
+                        <GenericButton label="Set Quiz Questions 📝" color="#8b5cf6" />
+                      </Link>
+                      <CreateHackathon readOnly={!isSystemAdmin} />
+                      <AdminDashboard readOnly={!isSystemAdmin} />   
+                      <HackathonList role="admin" readOnly={!isSystemAdmin} />
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                    <div className="flex flex-col gap-10">
                       {isRegistered ? <StudentIDCard data={studentData} /> : <StudentRegister onComplete={handleRegistrationComplete} />}
                       <HackathonList role="student" />
                     </div>
                   )}
                 </div>
               ) : (
-                /* UNAUTHENTICATED FLOW */
+                /* SCREEN TRANSITION NODE */
                 !showLoginCard ? (
                   <LandingPage onSignInClick={() => setShowLoginCard(true)} />
                 ) : (
-                  /* CLEAN GOOGLE SIGN-IN TERMINAL */
-                  <div style={{ 
-                    position: 'relative', 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    marginTop: '2vh', 
-                    width: '100%', 
-                    minHeight: '60vh', 
-                    padding: '0 20px', 
-                    boxSizing: 'border-box'
-                  }}>
+                  /* SIGN IN TERMINAL */
+                  <div className="relative flex justify-center items-center mt-[5vh] w-full min-h-[70vh] px-4">
+                    {/* BACK BUTTON */}
                     <button 
                       onClick={() => setShowLoginCard(false)} 
-                      style={{ 
-                        position: 'fixed', top: '95px', left: '4vw', background: 'rgba(2, 12, 27, 0.7)', 
-                        border: '1px solid rgba(0, 232, 255, 0.35)', borderRadius: '6px', padding: '9px 18px', 
-                        color: '#00e8ff', cursor: 'pointer', fontFamily: "'Share Tech Mono', monospace", fontSize: '0.8rem', zIndex: 1100 
-                      }}
+                      className="fixed top-24 left-[4vw] bg-[#020c1b]/70 border border-cyan-400/35 rounded-md px-4 py-2 text-cyan-400 font-mono text-xs tracking-widest transition-all duration-200 hover:bg-cyan-400/15 hover:shadow-[0_0_20px_rgba(0,232,255,0.4)] z-50 shadow-[0_0_15px_rgba(0,232,255,0.1)]"
                     >
                       ← RETURN
                     </button>
 
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      gap: '25px', 
-                      padding: '45px 35px', 
-                      width: '100%', 
-                      maxWidth: '500px', 
-                      background: 'rgba(15, 23, 42, 0.9)', 
-                      border: '1px solid rgba(0, 232, 255, 0.2)',
-                      backdropFilter: 'blur(20px)',
-                      borderRadius: '24px', 
-                      boxShadow: '0 20px 50px rgba(0,0,0,0.6)', 
-                      zIndex: 10 
-                    }}>
-                      <h1 style={{ color: '#00e8ff', fontSize: '2rem', fontWeight: '900', margin: 0, textTransform: 'uppercase', fontFamily: "'Orbitron', sans-serif" }}>
-                        HACKNEST TERMINAL
+                    {/* CARD OBJECT */}
+                    <div className="flex flex-col items-center gap-8 py-16 px-8 w-full max-w-3xl bg-gradient-to-r from-cyan-600 to-slate-900 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_-12px_rgba(0,0,0,0.6)] relative overflow-hidden z-10">
+                      <h1 className="text-slate-950 text-5xl md:text-7xl font-black m-0 tracking-tighter uppercase drop-shadow-[0_0_25px_rgba(6,33,185,0.5)] text-center">
+                        Welcome to <span className="text-slate-900 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]">HACKNEST</span>
                       </h1>
                       
-                      <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0, textAlign: 'center', fontFamily: "'Share Tech Mono', monospace" }}>
-                        Sign in with Google to access student dashboard & evaluation features.
+                      <p className="text-cyan-200/100 text-xl max-w-lg mx-5 text-center">
+                        Secure your identity. Start innovating.
                       </p>
-
+                      
                       <button 
                         onClick={handleLogin} 
-                        style={{ 
-                          width: '100%',
-                          padding: '14px 24px', 
-                          background: 'linear-gradient(135deg, #0284c7, #06b6d4)', 
-                          border: 'none', 
-                          borderRadius: '12px', 
-                          color: '#fff', 
-                          fontSize: '1rem', 
-                          fontWeight: 'bold', 
-                          cursor: 'pointer',
-                          boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)'
-                        }}
+                        className="px-9 py-4 bg-gradient-to-r from-slate-900 to-cyan-500 border-none rounded-2xl text-white text-lg font-extrabold cursor-pointer transition-transform hover:scale-105 active:scale-95 shadow-lg"
                       >
                         Sign in with Google
                       </button>
@@ -331,9 +225,9 @@ function App() {
                 )
               )
             } />
-            
-            <Route path="/quiz" element={user ? <ProctoredQuiz /> : <h1 className="text-white text-center font-mono mt-10">Please Login First</h1>} />
-            <Route path="/add-questions" element={isSystemAdmin || isDemoAdmin ? <AddQuestion /> : <h1 className="text-white text-center font-mono mt-10">Access Denied</h1>} />
+            <Route path="/quiz" element={user ? <ProctoredQuiz /> : <h1 className="text-white text-center font-mono mt-10 text-2xl">Please Login First</h1>} />
+            <Route path="/add-questions" element={(isSystemAdmin || role === 'admin') ? <AddQuestion readOnly={!isSystemAdmin} /> : <h1 className="text-white text-center font-mono mt-10 text-2xl">Access Denied</h1>} />
+            <Route path="/about" element={<AboutUs />} />
           </Routes>
         </main>
       </div>
